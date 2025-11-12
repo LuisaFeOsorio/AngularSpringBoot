@@ -1,0 +1,208 @@
+<div class="container py-4">
+  <!-- Botón volver -->
+  <div class="mb-4">
+    <button class="btn btn-outline-secondary" (click)="volverAlListado()">
+      <i class="bi bi-arrow-left"></i> Volver al listado
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="cargando" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+    <p class="mt-2">Cargando alojamiento...</p>
+  </div>
+
+  <div *ngIf="error && !cargando" class="alert alert-danger text-center">
+    <h4 class="alert-heading">Error</h4>
+    <p>{{ error }}</p>
+    <button class="btn btn-outline-danger" (click)="volverAlListado()">
+      Volver al listado
+    </button>
+  </div>
+
+  <!-- Detalle del alojamiento -->
+  <div *ngIf="alojamiento && !cargando" class="row">
+    <!-- Galería de imágenes -->
+    <div class="col-lg-8 mb-4">
+      <div class="card">
+        <div class="card-body p-0">
+          <!-- Imagen principal -->
+          <div class="position-relative">
+            <img [src]="getImagenes()[imagenActualIndex] || getImagenPrincipal()"
+                 class="img-fluid w-100"
+                 style="height: 500px; object-fit: cover;"
+                 [alt]="alojamiento.nombre">
+
+            <!-- Controles de navegación -->
+            <div *ngIf="getImagenes().length > 1" class="position-absolute top-50 start-0 end-0 d-flex justify-content-between px-3">
+              <button class="btn btn-light btn-sm"
+                      (click)="cambiarImagen('anterior')">
+                <i class="bi bi-chevron-left"></i>
+              </button>
+              <button class="btn btn-light btn-sm"
+                      (click)="cambiarImagen('siguiente')">
+                <i class="bi bi-chevron-right"></i>
+              </button>
+            </div>
+
+            <!-- Badge tipo -->
+            <span class="position-absolute top-0 start-0 m-3">
+              <span class="badge bg-primary fs-6">
+                {{ getTipoDisplayName(alojamiento.tipo) }}
+              </span>
+            </span>
+
+            <!-- Contador imágenes -->
+            <span *ngIf="getImagenes().length > 1"
+                  class="position-absolute top-0 end-0 m-3">
+              <span class="badge bg-dark bg-opacity-75 text-white">
+                {{ imagenActualIndex + 1 }}/{{ getImagenes().length }}
+              </span>
+            </span>
+          </div>
+
+          <!-- Miniaturas -->
+          <div *ngIf="getImagenes().length > 1" class="p-3">
+            <div class="d-flex gap-2 overflow-auto">
+              <img *ngFor="let imagen of getImagenes(); let i = index"
+                   [src]="imagen"
+                   class="img-thumbnail cursor-pointer"
+                   [class.border-primary]="i === imagenActualIndex"
+                   style="width: 80px; height: 60px; object-fit: cover; cursor: pointer;"
+                   (click)="seleccionarImagen(i)"
+                   [alt]="'Miniatura ' + (i + 1)">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Información y reserva -->
+    <div class="col-lg-4">
+      <div class="card sticky-top" style="top: 20px;">
+        <div class="card-body">
+          <!-- Información principal -->
+          <h1 class="h3 card-title mb-3">{{ alojamiento.nombre }}</h1>
+
+          <div class="mb-3">
+            <p class="text-muted mb-2">
+              <i class="bi bi-geo-alt-fill text-primary"></i>
+              {{ alojamiento.ciudad }}, {{ alojamiento.pais }}
+            </p>
+            <p *ngIf="alojamiento.direccion" class="text-muted small">
+              <i class="bi bi-geo-alt"></i> {{ alojamiento.direccion }}
+            </p>
+          </div>
+
+          <!-- Calificación -->
+          <div *ngIf="alojamiento.calificacionPromedio && alojamiento.calificacionPromedio > 0"
+               class="mb-3">
+            <div class="d-flex align-items-center gap-2">
+              <span class="badge bg-warning text-dark fs-6">
+                <i class="bi bi-star-fill"></i> {{ alojamiento.calificacionPromedio }}
+              </span>
+              <span class="text-muted small">
+                ({{ alojamiento.totalCalificaciones || 0 }} calificaciones)
+              </span>
+            </div>
+          </div>
+
+          <!-- Precio -->
+          <div class="border-top pt-3 mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="h4 text-primary mb-0">
+                {{ formatearPrecio(alojamiento.precioPorNoche) }}
+              </span>
+              <small class="text-muted">por noche</small>
+            </div>
+          </div>
+
+          <!-- Botón reserva -->
+          <button class="btn btn-primary btn-lg w-100 mb-3"
+                  (click)="reservarAlojamiento()">
+            <i class="bi bi-calendar-check"></i> Reservar Ahora
+          </button>
+
+          <!-- Información adicional -->
+          <div class="border-top pt-3">
+            <h6 class="mb-3">Detalles del alojamiento</h6>
+            <div class="row text-center">
+              <div class="col-4">
+                <div class="mb-2">
+                  <i class="bi bi-people fs-4 text-primary"></i>
+                </div>
+                <small class="text-muted d-block">Capacidad</small>
+                <strong>{{ alojamiento.capacidadMaxima }} personas</strong>
+              </div>
+              <div class="col-4">
+                <div class="mb-2">
+                  <i class="bi bi-door-closed fs-4 text-primary"></i>
+                </div>
+                <small class="text-muted d-block">Habitaciones</small>
+                <strong>{{ alojamiento.numeroHabitaciones }}</strong>
+              </div>
+              <div class="col-4">
+                <div class="mb-2">
+                  <i class="bi bi-bath fs-4 text-primary"></i>
+                </div>
+                <small class="text-muted d-block">Baños</small>
+                <strong>{{ alojamiento.numeroBanos }}</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Información detallada -->
+  <div *ngIf="alojamiento && !cargando" class="row mt-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <!-- Descripción -->
+          <div class="mb-4">
+            <h3 class="h5 mb-3">Descripción</h3>
+            <p class="card-text" [innerHTML]="alojamiento.descripcion || 'No hay descripción disponible.'"></p>
+          </div>
+
+          <!-- Servicios -->
+          <div *ngIf="alojamiento.servicios && alojamiento.servicios.length > 0" class="mb-4">
+            <h3 class="h5 mb-3">Servicios incluidos</h3>
+            <div class="row">
+              <div *ngFor="let servicio of alojamiento.servicios" class="col-md-6 col-lg-4 mb-2">
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-check-circle-fill text-success me-2"></i>
+                  <span>{{ servicio }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Información adicional -->
+          <div class="row">
+            <div class="col-md-6">
+              <h3 class="h5 mb-3">Información general</h3>
+              <ul class="list-unstyled">
+                <li class="mb-2">
+                  <strong>Tipo:</strong> {{ getTipoDisplayName(alojamiento.tipo) }}
+                </li>
+                <li class="mb-2">
+                  <strong>Ubicación:</strong> {{ alojamiento.ciudad }}, {{ alojamiento.pais }}
+                </li>
+                <li class="mb-2" *ngIf="alojamiento.direccion">
+                  <strong>Dirección:</strong> {{ alojamiento.direccion }}
+                </li>
+                <li class="mb-2" *ngIf="alojamiento.fechaCreacion">
+                  <strong>Disponible desde:</strong> {{ alojamiento.fechaCreacion | date:'longDate' }}
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recuperar Contraseña</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="container">
+  <div class="row justify-content-center min-vh-100 align-items-center">
+    <div class="col-md-6 col-lg-5">
+      <div class="card shadow">
+        <div class="card-body p-4">
+
+          <!-- Header -->
+          <div class="text-center mb-4">
+            <i class="bi bi-shield-lock text-primary" style="font-size: 3rem;"></i>
+            <h2 class="card-title mt-2">Recuperar Contraseña</h2>
+            <p class="text-muted">Sigue los pasos para restablecer tu contraseña</p>
+          </div>
+
+          <!-- Indicador de pasos -->
+          <div class="mb-4">
+            <div class="d-flex justify-content-between align-items-center">
+              <div class="text-center flex-fill">
+                <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center"
+                     [class.bg-secondary]="pasoActual < 1"
+                     style="width: 40px; height: 40px;">
+                  <span>1</span>
+                </div>
+                <div class="small mt-1">Email</div>
+              </div>
+              <div class="flex-fill">
+                <div class="progress" style="height: 2px;">
+                  <div class="progress-bar" [class.bg-secondary]="pasoActual < 2"
+                       [class.bg-primary]="pasoActual >= 2"></div>
+                </div>
+              </div>
+              <div class="text-center flex-fill">
+                <div class="rounded-circle d-inline-flex align-items-center justify-content-center"
+                     [class.bg-primary]="pasoActual >= 2"
+                     [class.bg-secondary]="pasoActual < 2"
+                     [class.text-white]="pasoActual >= 2"
+                     style="width: 40px; height: 40px;">
+                  <span>2</span>
+                </div>
+                <div class="small mt-1">Código</div>
+              </div>
+              <div class="flex-fill">
+                <div class="progress" style="height: 2px;">
+                  <div class="progress-bar" [class.bg-secondary]="pasoActual < 3"
+                       [class.bg-primary]="pasoActual >= 3"></div>
+                </div>
+              </div>
+              <div class="text-center flex-fill">
+                <div class="rounded-circle d-inline-flex align-items-center justify-content-center"
+                     [class.bg-primary]="pasoActual >= 3"
+                     [class.bg-secondary]="pasoActual < 3"
+                     [class.text-white]="pasoActual >= 3"
+                     style="width: 40px; height: 40px;">
+                  <span>3</span>
+                </div>
+                <div class="small mt-1">Nueva</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mensajes de éxito y error -->
+          <div *ngIf="mensajeExito" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            {{ mensajeExito }}
+            <button type="button" class="btn-close" (click)="mensajeExito = ''"></button>
+          </div>
+
+          <div *ngIf="mensajeError" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            {{ mensajeError }}
+            <button type="button" class="btn-close" (click)="mensajeError = ''"></button>
+          </div>
+
+          <!-- PASO 1: SOLICITAR CÓDIGO -->
+          <div *ngIf="pasoActual === 1">
+            <form [formGroup]="formularioEmail" (ngSubmit)="solicitarCodigo()">
+              <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input
+                  type="email"
+                  class="form-control"
+                  [class.is-invalid]="emailField?.invalid && emailField?.touched"
+                  id="email"
+                  formControlName="email"
+                  placeholder="tu@email.com"
+                  required>
+                <div *ngIf="emailField?.invalid && emailField?.touched" class="invalid-feedback">
+                  <div *ngIf="emailField?.errors?.['required']">El email es requerido</div>
+                  <div *ngIf="emailField?.errors?.['email']">Ingrese un email válido</div>
+                </div>
+              </div>
+
+              <div class="d-grid gap-2">
+                <button
+                  type="submit"
+                  class="btn btn-primary"
+                  [disabled]="isLoading || formularioEmail.invalid">
+                  <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status"></span>
+                  {{ isLoading ? 'Enviando código...' : 'Enviar Código' }}
+                </button>
+                <button type="button" class="btn btn-outline-secondary" (click)="volverALogin()">
+                  <i class="bi bi-arrow-left me-2"></i>Volver al Login
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- PASO 2: VERIFICAR CÓDIGO -->
+          <div *ngIf="pasoActual === 2">
+            <div class="alert alert-info">
+              <i class="bi bi-info-circle me-2"></i>
+              Hemos enviado un código de 6 dígitos a <strong>{{ email }}</strong>
+            </div>
+
+            <form [formGroup]="formularioCodigo" (ngSubmit)="verificarCodigo()">
+              <div class="mb-3">
+                <label for="codigo" class="form-label">Código de Verificación</label>
+                <input
+                  type="text"
+                  class="form-control text-center"
+                  [class.is-invalid]="codigoField?.invalid && codigoField?.touched"
+                  id="codigo"
+                  formControlName="codigo"
+                  placeholder="000000"
+                  maxlength="6"
+                  required>
+                <div *ngIf="codigoField?.invalid && codigoField?.touched" class="invalid-feedback">
+                  <div *ngIf="codigoField?.errors?.['required']">El código es requerido</div>
+                  <div *ngIf="codigoField?.errors?.['minlength'] || codigoField?.errors?.['maxlength']">El código debe tener 6 dígitos</div>
+                  <div *ngIf="codigoField?.errors?.['pattern']">Solo se permiten números</div>
+                </div>
+                <div class="form-text text-muted text-center">
+                  Ingresa el código de 6 dígitos que recibiste en tu email
+                </div>
+              </div>
+
+              <div class="d-grid gap-2">
+                <button
+                  type="submit"
+                  class="btn btn-primary"
+                  [disabled]="isLoading || formularioCodigo.invalid">
+                  <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status"></span>
+                  {{ isLoading ? 'Verificando...' : 'Verificar Código' }}
+                </button>
+
+                <div class="d-flex gap-2">
+                  <button type="button" class="btn btn-outline-secondary flex-fill" (click)="volverPasoAnterior()">
+                    <i class="bi bi-arrow-left me-2"></i>Volver
+                  </button>
+                  <button type="button" class="btn btn-outline-warning flex-fill" (click)="solicitarCodigo()">
+                    <i class="bi bi-arrow-clockwise me-2"></i>Reenviar Código
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <!-- PASO 3: NUEVA CONTRASEÑA -->
+          <div *ngIf="pasoActual === 3">
+            <div class="alert alert-success">
+              <i class="bi bi-check-circle me-2"></i>
+              Código verificado correctamente. Ahora crea tu nueva contraseña.
+            </div>
+
+            <form [formGroup]="formularioContrasenia" (ngSubmit)="restablecerContrasenia()">
+              <div class="mb-3">
+                <label for="nuevaContrasenia" class="form-label">Nueva Contraseña</label>
+                <input
+                  type="password"
+                  class="form-control"
+                  [class.is-invalid]="nuevaContraseniaField?.invalid && nuevaContraseniaField?.touched"
+                  id="nuevaContrasenia"
+                  formControlName="nuevaContrasenia"
+                  placeholder="Mínimo 6 caracteres"
+                  required>
+                <div *ngIf="nuevaContraseniaField?.invalid && nuevaContraseniaField?.touched" class="invalid-feedback">
+                  <div *ngIf="nuevaContraseniaField?.errors?.['required']">La contraseña es requerida</div>
+                  <div *ngIf="nuevaContraseniaField?.errors?.['minlength']">Mínimo 6 caracteres</div>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="confirmarContrasenia" class="form-label">Confirmar Contraseña</label>
+                <input
+                  type="password"
+                  class="form-control"
+                  [class.is-invalid]="(confirmarContraseniaField?.invalid && confirmarContraseniaField?.touched) || formularioContrasenia.errors?.['passwordsNoCoinciden']"
+                  id="confirmarContrasenia"
+                  formControlName="confirmarContrasenia"
+                  placeholder="Repite tu contraseña"
+                  required>
+                <div *ngIf="confirmarContraseniaField?.invalid && confirmarContraseniaField?.touched" class="invalid-feedback">
+                  Confirme su contraseña
+                </div>
+                <div *ngIf="formularioContrasenia.errors?.['passwordsNoCoinciden'] && confirmarContraseniaField?.touched" class="invalid-feedback d-block">
+                  Las contraseñas no coinciden
+                </div>
+              </div>
+
+              <div class="d-grid gap-2">
+                <button
+                  type="submit"
+                  class="btn btn-success"
+                  [disabled]="isLoading || formularioContrasenia.invalid">
+                  <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status"></span>
+                  {{ isLoading ? 'Restableciendo...' : 'Restablecer Contraseña' }}
+                </button>
+
+                <div class="d-flex gap-2">
+                  <button type="button" class="btn btn-outline-secondary flex-fill" (click)="volverPasoAnterior()">
+                    <i class="bi bi-arrow-left me-2"></i>Volver
+                  </button>
+                  <button type="button" class="btn btn-outline-danger flex-fill" (click)="reiniciarProceso()">
+                    <i class="bi bi-arrow-counterclockwise me-2"></i>Empezar de nuevo
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

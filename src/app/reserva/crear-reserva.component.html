@@ -1,0 +1,180 @@
+<!-- En crear-reserva.component.html -->
+<div class="container py-4">
+  <!-- Botón volver -->
+  <div class="mb-4">
+    <button class="btn btn-outline-secondary" (click)="volverAlDetalle()">
+      <i class="bi bi-arrow-left"></i> Volver al alojamiento
+    </button>
+  </div>
+
+  <!-- Error de autenticación -->
+  <div *ngIf="error" class="alert alert-danger">
+    <h4 class="alert-heading">Error de autenticación</h4>
+    <p>{{ error }}</p>
+    <a routerLink="/login" class="btn btn-outline-danger">Iniciar Sesión</a>
+  </div>
+
+  <!-- Información del usuario -->
+  <div *ngIf="authService.isLoggedIn() && !error" class="alert alert-info mb-4">
+    <i class="bi bi-person-check"></i>
+    <strong>Reservando como usuario autenticado</strong>
+  </div>
+
+  <!-- Resto del template... -->
+</div>
+
+<!-- Error cargando alojamiento -->
+<div *ngIf="error" class="alert alert-danger">
+  <h4 class="alert-heading">Error</h4>
+  <p>{{ error }}</p>
+</div>
+
+<!-- Información del alojamiento -->
+<div *ngIf="alojamiento && !error" class="row">
+  <div class="col-12">
+    <div class="card mb-4">
+      <div class="card-body">
+        <h1 class="h3 mb-3">Reservar: {{ alojamiento.nombre }}</h1>
+
+        <div class="row">
+          <div class="col-md-8">
+            <p class="text-muted mb-2">
+              <i class="bi bi-geo-alt-fill text-primary"></i>
+              {{ alojamiento.ciudad }}, {{ alojamiento.pais }}
+            </p>
+            <p class="mb-2">{{ alojamiento.descripcion }}</p>
+
+            <div class="d-flex gap-4 text-muted">
+              <small>
+                <i class="bi bi-people"></i> {{ alojamiento.capacidadMaxima }} huéspedes
+              </small>
+              <small>
+                <i class="bi bi-door-closed"></i> {{ alojamiento.numeroHabitaciones }} hab.
+              </small>
+              <small>
+                <i class="bi bi-bath"></i> {{ alojamiento.numeroBanos }} baños
+              </small>
+            </div>
+          </div>
+          <div class="col-md-4 text-end">
+            <span class="h4 text-primary">{{ formatearPrecio(alojamiento.precioPorNoche) }}</span>
+            <small class="text-muted d-block">por noche</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Formulario de reserva -->
+<div *ngIf="alojamiento && !error" class="row">
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-body">
+        <h3 class="h5 mb-4">Información de la Reserva</h3>
+
+        <!-- Fechas -->
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label for="checkIn" class="form-label">Check-in</label>
+            <input type="date"
+                   class="form-control"
+                   id="checkIn"
+                   [(ngModel)]="reserva.checkIn"
+                   [min]="getTodayDate()"
+                   required>
+          </div>
+          <div class="col-md-6">
+            <label for="checkOut" class="form-label">Check-out</label>
+            <input type="date"
+                   class="form-control"
+                   id="checkOut"
+                   [(ngModel)]="reserva.checkOut"
+                   [min]="getMinCheckoutDate()"
+                   required>
+          </div>
+        </div>
+
+        <!-- Número de huéspedes -->
+        <div class="mb-4">
+          <label for="numeroHuespedes" class="form-label">Número de huéspedes</label>
+          <input type="number"
+                 class="form-control"
+                 id="numeroHuespedes"
+                 [(ngModel)]="reserva.numeroHuespedes"
+                 [min]="1"
+                 [max]="alojamiento.capacidadMaxima"
+                 required>
+          <div class="form-text">
+            Capacidad máxima: {{ alojamiento.capacidadMaxima }} huéspedes
+          </div>
+        </div>
+
+        <!-- Servicios extra -->
+        <div *ngIf="alojamiento.servicios && alojamiento.servicios.length > 0" class="mb-4">
+          <label class="form-label">Servicios incluidos</label>
+          <div class="row">
+            <div *ngFor="let servicio of alojamiento.servicios" class="col-md-6 mb-2">
+              <div class="form-check">
+                <input class="form-check-input"
+                       type="checkbox"
+                       [id]="'servicio-' + servicio"
+                       [checked]="reserva.serviciosExtras.includes(servicio)"
+                       (change)="toggleServicio(servicio, $event)">
+                <label class="form-check-label" [for]="'servicio-' + servicio">
+                  {{ servicio }}
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Resumen y total -->
+  <div class="col-lg-4">
+    <div class="card sticky-top" style="top: 20px;">
+      <div class="card-body">
+        <h4 class="h5 mb-3">Resumen de Reserva</h4>
+
+        <div class="mb-3">
+          <div class="d-flex justify-content-between mb-2">
+            <span>Precio por noche:</span>
+            <span>{{ formatearPrecio(alojamiento.precioPorNoche) }}</span>
+          </div>
+
+          <div *ngIf="reserva.checkIn && reserva.checkOut" class="d-flex justify-content-between mb-2">
+            <span>Noches:</span>
+            <span>{{ calcularNoches() }}</span>
+          </div>
+
+          <div *ngIf="reserva.checkIn && reserva.checkOut" class="d-flex justify-content-between mb-2">
+            <span>Huéspedes:</span>
+            <span>{{ reserva.numeroHuespedes }}</span>
+          </div>
+        </div>
+
+        <hr>
+
+        <div class="d-flex justify-content-between mb-3">
+          <strong>Total:</strong>
+          <strong class="h5 text-primary">{{ formatearPrecio(calcularTotal()) }}</strong>
+        </div>
+
+        <!-- Mensajes -->
+        <div *ngIf="mensaje"
+             [class]="exito ? 'alert alert-success' : 'alert alert-danger'">
+          {{ mensaje }}
+        </div>
+
+        <button class="btn btn-primary btn-lg w-100"
+                (click)="crearReserva()"
+                [disabled]="cargando || !reserva.checkIn || !reserva.checkOut">
+          <span *ngIf="cargando" class="spinner-border spinner-border-sm me-2"></span>
+          {{ cargando ? 'Creando reserva...' : 'Confirmar Reserva' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

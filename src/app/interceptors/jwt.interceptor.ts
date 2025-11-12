@@ -1,0 +1,14 @@
+// jwt.interceptor.ts
+import { Injectable } from '@angular/core';
+import {HttpInterceptorFn, HttpRequest, HttpHandler, HttpEvent} from '@angular/common/http';
+import { AuthService } from '../auth/auth.service';
+import {Observable} from 'rxjs';
+
+export const jwtInterceptor: (req: HttpRequest<any>, next: HttpHandler) => (Observable<HttpEvent<any>>) = (req: HttpRequest<any>, next: HttpHandler) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    const cloned = req.clone({ headers: req.headers.set('Authorization', `Bearer ${token}`) });
+    return next.handle(cloned);
+  }
+  return next.handle(req);
+};
