@@ -1,0 +1,56 @@
+<div class="container py-5">
+  <h2 class="mb-4 text-center">Editar Perfil de Usuario</h2>
+
+  <div *ngIf="mensaje" class="alert alert-success text-center">{{ mensaje }}</div>
+  <div *ngIf="error" class="alert alert-danger text-center">{{ error }}</div>
+
+  <form (ngSubmit)="actualizarUsuario()" class="card shadow-sm p-4">
+    <div class="row g-3">
+
+      <!-- Nombre completo -->
+      <div class="col-12">
+        <label class="form-label">Nombre completo</label>
+        <input type="text" class="form-control" [(ngModel)]="usuario.nombreCompleto" name="nombreCompleto" required>
+      </div>
+
+      <!-- Teléfono -->
+      <div class="col-md-6">
+        <label class="form-label">Teléfono</label>
+        <input type="text" class="form-control" [(ngModel)]="usuario.telefono" name="telefono">
+      </div>
+
+      <!-- Contraseña -->
+      <div class="col-md-6">
+        <label class="form-label">Nueva contraseña (opcional)</label>
+        <input type="password" class="form-control" [(ngModel)]="usuario.contrasenia" name="contrasenia"
+               placeholder="Dejar vacío para mantener la actual">
+      </div>
+
+      <!-- Fecha nacimiento -->
+      <div class="col-md-6">
+        <label class="form-label">Fecha de nacimiento</label>
+        <input type="date" class="form-control" [(ngModel)]="usuario.fechaNacimiento" name="fechaNacimiento" required>
+      </div>
+
+      <!-- Rol -->
+      <div class="col-md-6">
+        <label class="form-label">Rol</label>
+        <select class="form-select" [(ngModel)]="usuario.rol" name="rol">
+          <option value="USUARIO">Usuario</option>
+          <option value="ANFITRION">Anfitrión</option>
+        </select>
+      </div>
+
+    </div>
+
+    <div class="text-center mt-4">
+      <button type="submit" class="btn btn-primary" [disabled]="cargando">
+        <span *ngIf="!cargando">💾 Guardar cambios</span>
+        <span *ngIf="cargando" class="spinner-border spinner-border-sm"></span>
+      </button>
+      <button type="button" class="btn btn-secondary ms-2" (click)="router.navigate(['/home-usuario'])">
+        ↩️ Cancelar
+      </button>
+    </div>
+  </form>
+</div>

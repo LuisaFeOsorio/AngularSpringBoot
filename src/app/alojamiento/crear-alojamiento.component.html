@@ -1,0 +1,158 @@
+<div class="container py-4">
+  <h2 class="mb-3 text-primary fw-bold">Crear nuevo alojamiento</h2>
+  <p class="text-muted">Completa los datos para publicar tu alojamiento.</p>
+
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+  <div *ngIf="mensaje" class="alert alert-success">{{ mensaje }}</div>
+
+  <form (ngSubmit)="crearAlojamiento()" #formCrear="ngForm" novalidate class="card shadow p-4">
+    <div class="row g-3">
+      <!-- Nombre -->
+      <div class="col-md-6">
+        <label class="form-label fw-bold">Nombre</label>
+        <input [(ngModel)]="alojamiento.nombre" name="nombre" class="form-control" required minlength="5">
+      </div>
+      <label class="form-label">Imagen del alojamiento</label>
+      <input type="file"
+             class="form-control"
+             (change)="onFileSelected($event)"
+             accept="image/*">
+
+      <!-- Tipo -->
+      <div class="col-md-6">
+        <label class="form-label fw-bold">Tipo</label>
+        <select [(ngModel)]="alojamiento.tipo" name="tipo" class="form-select" required>
+          <option value="" disabled>Selecciona un tipo</option>
+          <option *ngFor="let tipo of tiposAlojamiento" [value]="tipo">{{ tipo }}</option>
+        </select>
+      </div>
+
+      <!-- Descripción -->
+      <div class="col-md-12">
+        <label class="form-label fw-bold">Descripción</label>
+        <textarea [(ngModel)]="alojamiento.descripcion" name="descripcion"
+                  class="form-control" rows="3" required minlength="10"></textarea>
+      </div>
+
+      <!-- Ciudad / País / Dirección -->
+      <div class="col-md-4">
+        <label class="form-label fw-bold">Ciudad</label>
+        <input [(ngModel)]="alojamiento.ciudad" name="ciudad" class="form-control" required>
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label fw-bold">País</label>
+        <input [(ngModel)]="alojamiento.pais" name="pais" class="form-control" required>
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label fw-bold">Dirección</label>
+        <input [(ngModel)]="alojamiento.direccion" name="direccion" class="form-control" required>
+      </div>
+
+      <!-- Precio / Capacidad / Habitaciones / Baños -->
+      <div class="col-md-4">
+        <label class="form-label fw-bold">Precio por noche (COP)</label>
+        <input [(ngModel)]="alojamiento.precioPorNoche"
+               name="precioPorNoche"
+               type="number"
+               class="form-control"
+               required
+               min="10000"
+               [ngModelOptions]="{standalone: false}">
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label fw-bold">Capacidad máxima</label>
+        <input [(ngModel)]="alojamiento.capacidadMaxima"
+               name="capacidadMaxima"
+               type="number"
+               class="form-control"
+               required
+               min="1">
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label fw-bold">Habitaciones</label>
+        <input [(ngModel)]="alojamiento.numeroHabitaciones"
+               name="numeroHabitaciones"
+               type="number"
+               class="form-control"
+               required
+               min="1">
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label fw-bold">Baños</label>
+        <input [(ngModel)]="alojamiento.numeroBanos"
+               name="numeroBanos"
+               type="number"
+               class="form-control"
+               required
+               min="1">
+      </div>
+    </div>
+
+    <hr>
+
+    <!-- Servicios -->
+    <div class="row g-3 mt-2">
+      <div class="col-md-6">
+        <label class="form-label fw-bold">Servicios</label>
+        <div class="d-flex flex-wrap gap-2">
+          <button *ngFor="let servicio of serviciosDisponibles"
+                  type="button"
+                  class="btn btn-sm"
+                  [class.btn-outline-primary]="!alojamiento.servicios.includes(servicio)"
+                  [class.btn-primary]="alojamiento.servicios.includes(servicio)"
+                  (click)="alojamiento.servicios.includes(servicio)
+                            ? eliminarServicio(servicio)
+                            : agregarServicio(servicio)">
+            {{ servicio }}
+          </button>
+        </div>
+        <small class="text-muted d-block mt-1">Selecciona los servicios disponibles</small>
+      </div>
+
+      <!-- Imágenes -->
+      <div class="col-md-6">
+        <label class="form-label fw-bold">URLs de imágenes</label>
+        <div class="input-group mb-2">
+          <input #imgInput type="text" class="form-control" placeholder="https://...jpg">
+          <button type="button"
+                  class="btn btn-outline-secondary"
+                  (click)="agregarImagen(imgInput.value); imgInput.value=''">
+            Agregar
+          </button>
+        </div>
+        <ul class="list-group small">
+          <li *ngFor="let img of alojamiento.imagenes"
+              class="list-group-item d-flex justify-content-between align-items-center">
+            {{ img }}
+            <button type="button" class="btn btn-sm btn-danger" (click)="eliminarImagen(img)">✖</button>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <hr>
+
+    <!-- Botones -->
+    <div class="mt-4 d-flex justify-content-end gap-2">
+      <button class="btn btn-outline-secondary" type="button" (click)="router.navigate(['/home-anfitrion'])">
+        Cancelar
+      </button>
+
+      <button class="btn btn-primary" type="submit" [disabled]="formCrear.invalid || cargando">
+        {{ cargando ? 'Creando...' : 'Crear alojamiento' }}
+      </button>
+    </div>
+
+    <!-- Diagnóstico temporal -->
+    <pre class="mt-3 bg-light p-2 border small">
+      Formulario válido: {{ formCrear.valid }}
+      <br>
+      Valor del modelo: {{ alojamiento | json }}
+    </pre>
+  </form>
+</div>

@@ -1,54 +1,63 @@
 <div class="container py-4">
-  <h1 class="mb-4">Alojamientos Disponibles</h1>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="fw-bold text-primary mb-0">Alojamientos Disponibles</h1>
+
+    <!-- 🔵 Botones superiores -->
+    <div class="d-flex gap-2">
+      <button class="btn btn-outline-primary" (click)="actualizarUsuario()">
+        <i class="bi bi-person-lines-fill me-1"></i> Actualizar Usuario
+      </button>
+
+      <button class="btn btn-outline-success" (click)="verHistorialReservas()">
+        <i class="bi bi-journal-text me-1"></i> Ver Historial de Reservas
+      </button>
+    </div>
+  </div>
 
   <div class="mb-3">
     <button class="btn btn-outline-secondary btn-sm" (click)="recargar()">
-      🔄 Recargar (Debug)
+      🔄 Recargar
     </button>
     <small class="text-muted ms-2">Estado: {{ cargando ? 'Cargando...' : 'Listo' }}</small>
   </div>
 
+  <!-- Spinner -->
   <div *ngIf="cargando" class="text-center py-5">
     <div class="spinner-border text-primary" role="status">
       <span class="visually-hidden">Cargando...</span>
     </div>
-    <p class="mt-2">Cargando alojamientos...</p>
-    <small class="text-muted">Consultando: /api/alojamientos</small>
+    <p class="mt-2 text-muted">Cargando alojamientos...</p>
   </div>
 
-  <div *ngIf="error && !cargando" class="alert alert-danger alert-dismissible fade show" role="alert">
+  <!-- Error -->
+  <div *ngIf="error && !cargando" class="alert alert-danger alert-dismissible fade show">
     <strong>Error:</strong> {{ error }}
-    <br>
-    <small>Ver consola para más detalles</small>
     <button type="button" class="btn-close" (click)="error = ''"></button>
   </div>
 
-  <!-- Grid de Alojamientos -->
+  <!-- Alojamientos -->
   <div *ngIf="!cargando && !error" class="row g-4">
-    <div class="col-12">
-      <p class="text-muted">
-        Mostrando {{ alojamientos.length }} alojamientos
-      </p>
-    </div>
-
-    <div *ngFor="let alojamiento of alojamientos; let i = index" class="col-lg-4 col-md-6">
+    <div *ngFor="let alojamiento of alojamientos" class="col-lg-4 col-md-6">
       <div class="card h-100 shadow-sm">
-        <!-- Imagen -->
-        <img [src]="getImagenPrincipal(alojamiento)"
-             class="card-img-top"
-             [alt]="alojamiento.nombre"
-             style="height: 200px; object-fit: cover;">
+        <img
+          [src]="getImagenPrincipal(alojamiento)"
+          class="card-img-top"
+          [alt]="alojamiento.nombre"
+          style="height: 200px; object-fit: cover;"
+        />
 
         <div class="card-body">
           <h5 class="card-title">{{ alojamiento.nombre }}</h5>
           <p class="text-muted">
             <i class="bi bi-geo-alt"></i> {{ alojamiento.ciudad }}, {{ alojamiento.pais }}
           </p>
-          <p class="card-text">{{ (alojamiento.descripcion || '').slice(0, 100) }}...</p>
+          <p class="card-text">
+            {{ (alojamiento.descripcion || '').slice(0, 100) }}...
+          </p>
 
           <div class="mb-3">
             <small class="text-muted me-3">
-              <i class="bi bi-people"></i> {{ alojamiento.capacidadMaxima }} huesp.
+              <i class="bi bi-people"></i> {{ alojamiento.capacidadMaxima }} huésp.
             </small>
             <small class="text-muted me-3">
               <i class="bi bi-door-closed"></i> {{ alojamiento.numeroHabitaciones }} hab.
@@ -59,11 +68,8 @@
           </div>
 
           <div class="d-flex justify-content-between align-items-center">
-            <span class="h5 text-primary mb-0">
-              {{ formatearPrecio(alojamiento.precioPorNoche) }}
-            </span>
-            <button class="btn btn-primary btn-sm"
-                    (click)="verDetalle(alojamiento.id)">
+            <span class="h5 text-primary mb-0">{{ formatearPrecio(alojamiento.precioPorNoche) }}</span>
+            <button class="btn btn-primary btn-sm" (click)="verDetalle(alojamiento.id)">
               Ver Más
             </button>
           </div>
@@ -75,6 +81,5 @@
   <!-- Sin resultados -->
   <div *ngIf="!cargando && !error && alojamientos.length === 0" class="text-center py-5">
     <h3 class="text-muted">No hay alojamientos disponibles</h3>
-    <p class="text-muted">El backend no devolvió ningún alojamiento</p>
   </div>
 </div>

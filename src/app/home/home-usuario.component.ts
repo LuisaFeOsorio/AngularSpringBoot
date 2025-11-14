@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { AuthService } from '../auth/auth.service'; // ✅ Asegúrate de tener este servicio
 
 interface AlojamientoDTO {
   id: number;
@@ -21,14 +22,15 @@ interface AlojamientoDTO {
 }
 
 @Component({
-  selector: 'app-alojamientos',
+  selector: 'app-dashboard-usuario',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './home-usuario.component.html'
+  templateUrl: 'home-usuario.component.html'
 })
 export class DashboardUsuarioComponent implements OnInit {
   private http = inject(HttpClient);
   private router = inject(Router);
+  private authService = inject(AuthService); // ✅ Inyectamos el AuthService
 
   alojamientos: AlojamientoDTO[] = [];
   cargando = true;
@@ -40,84 +42,63 @@ export class DashboardUsuarioComponent implements OnInit {
   }
 
   cargarAlojamientos(): void {
-    console.log('🟡 cargarAlojamientos - Iniciando carga');
     this.cargando = true;
     this.error = '';
 
-    const url = '/api/alojamientos';
-    console.log('🔗 URL de la petición:', url);
+    const url = 'http://localhost:8080/api/alojamientos';
+    console.log('🔗 Cargando alojamientos desde', url);
 
-    this.http.get<AlojamientoDTO[]>(url)
-      .subscribe({
-        next: (alojamientos) => {
-          console.log('✅ SUCCESS - Alojamientos cargados exitosamente');
-          console.log('📦 Datos recibidos:', alojamientos);
-          console.log('🔢 Número de alojamientos:', alojamientos.length);
-
-          this.alojamientos = alojamientos;
-          this.cargando = false;
-
-          // Log detallado de cada alojamiento
-          alojamientos.forEach((aloj, index) => {
-            console.log(`🏠 Alojamiento ${index + 1}:`, {
-              id: aloj.id,
-              nombre: aloj.nombre,
-              ciudad: aloj.ciudad,
-              precio: aloj.precioPorNoche,
-              imagenes: aloj.imagenes?.length || 0
-            });
-          });
-        },
-        error: (err: HttpErrorResponse) => {
-          console.error('❌ ERROR - Error cargando alojamientos:', err);
-          console.log('📊 Detalles del error:', {
-            status: err.status,
-            statusText: err.statusText,
-            url: err.url,
-            ok: err.ok,
-            headers: err.headers,
-            error: err.error
-          });
-
-          this.alojamientos = [];
-          this.cargando = false;
-          this.error = `Error ${err.status}: ${err.statusText}`;
-
-          // Mostrar el error completo en consola
-          console.log('🔄 Error completo:', JSON.stringify(err, null, 2));
-        },
-        complete: () => {
-          console.log('🏁 COMPLETE - Petición finalizada');
-        }
-      });
+    this.http.get<AlojamientoDTO[]>(url).subscribe({
+      next: (alojamientos) => {
+        console.log('✅ Alojamientos cargados', alojamientos);
+        this.alojamientos = alojamientos;
+        this.cargando = false;
+      },
+      error: (err: HttpErrorResponse) => {
+        console.error('❌ Error cargando alojamientos:', err);
+        this.alojamientos = [];
+        this.cargando = false;
+        this.error = `Error ${err.status}: ${err.statusText}`;
+      }
+    });
   }
 
   verDetalle(alojamientoId: number): void {
-    console.log('🔍 Ver detalle del alojamiento:', alojamientoId);
     this.router.navigate(['/detalle-alojamiento', alojamientoId]);
   }
 
   getImagenPrincipal(alojamiento: AlojamientoDTO): string {
-    const imagen = alojamiento.imagenPrincipal ||
-      (alojamiento.imagenes && alojamiento.imagenes.length > 0 ? alojamiento.imagenes[0] : 'assets/images/placeholder-alojamiento.jpg');
-
-    console.log(`🖼️ Imagen para alojamiento ${alojamiento.id}:`, imagen);
-    return imagen;
+    return (
+      alojamiento.imagenPrincipal ||
+      alojamiento.imagenes?.[0] ||
+      'assets/images/placeholder-alojamiento.jpg'
+    );
   }
 
   formatearPrecio(precio: number): string {
-    const precioFormateado = new Intl.NumberFormat('es-CO', {
+    return new Intl.NumberFormat('es-CO', {
       style: 'currency',
       currency: 'COP'
     }).format(precio);
-
-    console.log(`💰 Precio formateado: ${precio} -> ${precioFormateado}`);
-    return precioFormateado;
   }
 
-  // Método para recargar manualmente
   recargar(): void {
-    console.log('🔄 Recargando alojamientos...');
     this.cargarAlojamientos();
+  }
+
+  // 🔵 Botón para editar usuario
+  actualizarUsuario() {
+    const userId = this.authService.getCurrentUserId(); // ✅ obtenemos el ID del usuario autenticado
+    if (userId) {
+      console.log('🧑‍💼 Redirigiendo a actualizar usuario con ID:', userId);
+      this.router.navigate(['/editar-usuario', userId]); // ✅ enviamos el ID como parámetro en la ruta
+    } else {
+      console.error('❌ No se encontró el ID del usuario autenticado.');
+    }
+  }
+
+  verHistorialReservas() {
+    console.log('📜 Redirigiendo al historial de reservas');
+    this.router.navigate(['/mis-reservas']);
   }
 }

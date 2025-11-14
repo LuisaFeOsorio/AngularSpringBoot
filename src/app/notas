@@ -1,5 +1,7 @@
 //consumirlo desde angular: getAlojamientos() {
   return this.http.get<AlojamientoDTO[]>('http://localhost:8080/api/alojamientos');
 }
+
+cambie editar en bac y front
 ng serve --proxy-config proxy.conf.json
 

@@ -1,0 +1,85 @@
+<div class="container mt-5">
+  <div class="card shadow-lg p-4">
+    <h3 class="text-center text-primary mb-4 fw-bold">
+      ✏️ Editar Alojamiento
+    </h3>
+
+    <form (ngSubmit)="actualizarAlojamiento()" *ngIf="alojamiento" class="row g-3">
+
+      <!-- Nombre -->
+      <div class="col-md-6">
+        <label class="form-label fw-bold">Nombre</label>
+        <input type="text" [(ngModel)]="alojamiento.nombre" name="nombre" class="form-control" required />
+      </div>
+
+      <!-- Tipo -->
+      <div class="col-md-6">
+        <label class="form-label fw-bold">Tipo</label>
+        <input type="text" [(ngModel)]="alojamiento.tipo" name="tipo" class="form-control" required />
+      </div>
+
+      <!-- Descripción -->
+      <div class="col-12">
+        <label class="form-label fw-bold">Descripción</label>
+        <textarea [(ngModel)]="alojamiento.descripcion" name="descripcion" class="form-control" rows="3"></textarea>
+      </div>
+
+      <!-- Ciudad -->
+      <div class="col-md-6">
+        <label class="form-label fw-bold">Ciudad</label>
+        <input type="text" [(ngModel)]="alojamiento.ciudad" name="ciudad" class="form-control" />
+      </div>
+
+      <!-- País -->
+      <div class="col-md-6">
+        <label class="form-label fw-bold">País</label>
+        <input type="text" [(ngModel)]="alojamiento.pais" name="pais" class="form-control" />
+      </div>
+
+      <!-- Dirección -->
+      <div class="col-12">
+        <label class="form-label fw-bold">Dirección</label>
+        <input type="text" [(ngModel)]="alojamiento.direccion" name="direccion" class="form-control" />
+      </div>
+
+      <!-- Precio -->
+      <div class="col-md-4">
+        <label class="form-label fw-bold">Precio por Noche</label>
+        <input type="number" [(ngModel)]="alojamiento.precioPorNoche" name="precioPorNoche" class="form-control" />
+      </div>
+
+      <!-- Capacidad -->
+      <div class="col-md-4">
+        <label class="form-label fw-bold">Capacidad Máxima</label>
+        <input type="number" [(ngModel)]="alojamiento.capacidadMaxima" name="capacidadMaxima" class="form-control" />
+      </div>
+
+      <!-- Habitaciones -->
+      <div class="col-md-4">
+        <label class="form-label fw-bold">Número de Habitaciones</label>
+        <input type="number" [(ngModel)]="alojamiento.numeroHabitaciones" name="numeroHabitaciones" class="form-control" />
+      </div>
+
+      <!-- Baños -->
+      <div class="col-md-4">
+        <label class="form-label fw-bold">Número de Baños</label>
+        <input type="number" [(ngModel)]="alojamiento.numeroBanos" name="numeroBanos" class="form-control" />
+      </div>
+
+      <!-- Servicios -->
+      <div class="col-12">
+        <label class="form-label fw-bold">Servicios (separados por coma)</label>
+        <input type="text" [(ngModel)]="serviciosTexto" (change)="actualizarServicios()" name="servicios" class="form-control" placeholder="WiFi, TV, Cocina..." />
+      </div>
+
+      <div class="col-12 text-center mt-4">
+        <button type="submit" class="btn btn-primary px-4 fw-bold" [disabled]="cargando">
+          {{ cargando ? 'Guardando...' : '💾 Guardar Cambios' }}
+        </button>
+      </div>
+    </form>
+
+    <div *ngIf="mensaje" class="alert alert-success mt-3 text-center">{{ mensaje }}</div>
+    <div *ngIf="error" class="alert alert-danger mt-3 text-center">{{ error }}</div>
+  </div>
+</div>

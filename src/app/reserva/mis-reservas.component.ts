@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ReservaService, ReservaDTO } from './reserva.service';
 import { AuthService } from '../auth/auth.service';
+import {HttpClient} from '@angular/common/http';
 
 @Component({
   selector: 'app-mis-reservas',
@@ -14,6 +15,7 @@ import { AuthService } from '../auth/auth.service';
 export class MisReservasComponent implements OnInit {
   private reservaService = inject(ReservaService);
   private authService = inject(AuthService);
+  private http = inject(HttpClient);
   private router = inject(Router);
 
   reservas: ReservaDTO[] = [];
@@ -48,6 +50,25 @@ export class MisReservasComponent implements OnInit {
         }
       }
     });
+  }
+  cancelarReserva(id: number) {
+    if (!confirm('¿Estás segura de que deseas cancelar esta reserva?')) {
+      return;
+    }
+
+    const headers = this.authService.getAuthHeaders();
+
+    this.http.put(`http://localhost:8080/api/reservas/${id}/cancelar`, {}, { headers })
+      .subscribe({
+        next: (res: any) => {
+          alert('Reserva cancelada con éxito.');
+          this.cargarReservas(); // 🔄 recarga la lista
+        },
+        error: (err) => {
+          console.error('❌ Error cancelando reserva:', err);
+          alert('Error al cancelar la reserva.');
+        }
+      });
   }
 
   verDetalleAlojamiento(nombre: string) {

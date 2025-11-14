@@ -17,6 +17,25 @@
       <p><strong>Huéspedes:</strong> {{ reserva.numeroHuespedes }}</p>
       <p><strong>Total:</strong> {{ reserva.precioTotal | currency:'COP':'symbol':'1.0-0' }}</p>
       <p><strong>Estado:</strong> <span class="font-semibold">{{ reserva.estado }}</span></p>
+      <tr *ngFor="let reserva of reservas">
+        <td>{{ reserva.alojamientoNombre }}</td>
+        <td>{{ reserva.checkIn | date }}</td>
+        <td>{{ reserva.checkOut | date }}</td>
+        <td>{{ reserva.estado }}</td>
+        <td>
+          <button
+            *ngIf="reserva.estado !== 'CANCELADA'"
+            class="btn btn-danger btn-sm"
+            (click)="cancelarReserva(reserva.id)">
+            Cancelar
+          </button>
+
+          <span *ngIf="reserva.estado === 'CANCELADA'" class="text-muted">
+      Cancelada
+    </span>
+        </td>
+      </tr>
+
     </div>
   </div>
 </div>

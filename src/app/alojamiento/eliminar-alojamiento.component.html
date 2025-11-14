@@ -1,0 +1,60 @@
+<div class="container mt-5">
+  <div class="card shadow-lg border-0">
+    <div class="card-header bg-danger text-white text-center fw-bold">
+      🏠 Eliminar Alojamiento
+    </div>
+
+    <div class="card-body p-4">
+
+      <!-- Mensajes -->
+      <div *ngIf="mensaje" class="alert alert-info text-center">{{ mensaje }}</div>
+      <div *ngIf="error" class="alert alert-danger text-center">{{ error }}</div>
+
+      <!-- Cargando -->
+      <div *ngIf="cargando" class="text-center my-4">
+        <div class="spinner-border text-danger" role="status"></div>
+        <p class="mt-2">Procesando...</p>
+      </div>
+
+      <!-- Información del alojamiento -->
+      <div *ngIf="alojamiento && !cargando">
+        <h5 class="fw-bold">{{ alojamiento.nombre }}</h5>
+        <p><strong>Ciudad:</strong> {{ alojamiento.ciudad }}</p>
+        <p><strong>País:</strong> {{ alojamiento.pais }}</p>
+        <p><strong>Precio por noche:</strong> {{ alojamiento.precioPorNoche | currency }}</p>
+        <p><strong>Capacidad máxima:</strong> {{ alojamiento.capacidadMaxima }}</p>
+        <p><strong>Estado:</strong>
+          <span [class.text-success]="alojamiento.activo" [class.text-danger]="!alojamiento.activo">
+            {{ alojamiento.activo ? 'Activo' : 'Inactivo' }}
+          </span>
+        </p>
+        <hr>
+        <p><strong>Servicios:</strong></p>
+        <ul class="list-group mb-3">
+          <li *ngFor="let s of alojamiento.servicios" class="list-group-item">
+            {{ s }}
+          </li>
+        </ul>
+      </div>
+
+      <!-- Botones -->
+      <div class="d-flex justify-content-center gap-3 mt-4" *ngIf="!cargando">
+        <button class="btn btn-secondary" (click)="router.navigate(['/alojamientos'])">
+          ⬅️ Volver
+        </button>
+
+        <button
+          class="btn btn-danger fw-bold"
+          [disabled]="!puedeEliminarse"
+          (click)="eliminarAlojamiento()">
+          🗑️ Marcar como Inactivo
+        </button>
+      </div>
+
+      <!-- Si no puede eliminarse -->
+      <div *ngIf="puedeEliminarse === false && !cargando" class="alert alert-warning mt-3 text-center">
+        🚫 Este alojamiento tiene reservas futuras y no puede eliminarse.
+      </div>
+    </div>
+  </div>
+</div>

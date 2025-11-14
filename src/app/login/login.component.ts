@@ -97,7 +97,7 @@ export class LoginComponent {
 
       // Redirigir según el rol
       if (role === 'ANFITRION') {
-        this.router.navigate(['/mis-alojamientos']);
+        this.router.navigate(['/home-anfitrion']);
       } else {
         this.router.navigate(['/home-usuario']);
       }

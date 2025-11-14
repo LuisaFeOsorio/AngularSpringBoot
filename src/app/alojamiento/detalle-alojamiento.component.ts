@@ -1,8 +1,13 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 
+interface ResponseDTO<T> {
+  error: boolean;
+  mensaje: string;
+  data: T;
+}
 
 interface AlojamientoDTO {
   id: number;
@@ -33,6 +38,7 @@ interface AlojamientoDTO {
   templateUrl: './detalle-alojamiento.component.html'
 })
 export class DetalleAlojamientoComponent implements OnInit {
+
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private http = inject(HttpClient);
@@ -46,60 +52,58 @@ export class DetalleAlojamientoComponent implements OnInit {
     this.cargarAlojamiento();
   }
 
-  cargarAlojamiento(): void {
-    const id = this.route.snapshot.paramMap.get('id');
-    console.log('🔵 ID obtenido de la ruta:', id, 'Tipo:', typeof id);
+  cargarAlojamiento() {
+    const id = Number(this.route.snapshot.paramMap.get("id"));
+    const url = `http://localhost:8080/api/alojamientos/${id}`;
 
-    if (!id) {
-      this.error = 'ID de alojamiento no válido';
-      this.cargando = false;
-      return;
-    }
+    console.log("🔵 Solicitando alojamiento con ID:", id);
 
-    const url = `/api/alojamientos/${id}`;
-    console.log('🔗 URL completa:', url);
+    this.http.get<ResponseDTO<AlojamientoDTO>>(url).subscribe({
+      next: (res) => {
+        console.log("📦 Respuesta backend:", res);
 
-    this.http.get<AlojamientoDTO>(url)
-      .subscribe({
-        next: (alojamiento) => {
-          console.log('✅ ALOJAMIENTO CARGADO EXITOSAMENTE:', alojamiento);
-          this.alojamiento = alojamiento;
+        if (!res || !res.data) {
+          this.error = "No se encontró el alojamiento.";
           this.cargando = false;
-        },
-        error: (err) => {
-          console.error('❌ ERROR DETALLADO:', err);
-          console.log('📊 Status:', err.status);
-          console.log('📊 Message:', err.message);
-          console.log('📊 Error body:', err.error);
-
-          this.error = `Error ${err.status}: ${err.message}`;
-          this.cargando = false;
+          return;
         }
-      });
+
+        this.alojamiento = res.data;
+        this.cargando = false;
+
+        console.log("🏠 Alojamiento cargado:", this.alojamiento);
+      },
+      error: (err) => {
+        console.error("❌ Error cargando alojamiento:", err);
+        this.error = "No se pudo cargar el alojamiento.";
+        this.cargando = false;
+      }
+    });
   }
 
-  getImagenPrincipal(): string {
-    if (!this.alojamiento) return 'assets/images/placeholder-alojamiento.jpg';
 
-    return this.alojamiento.imagenPrincipal ||
-      (this.alojamiento.imagenes && this.alojamiento.imagenes.length > 0 ?
-        this.alojamiento.imagenes[0] : 'assets/images/placeholder-alojamiento.jpg');
-  }
-
+  /** IMÁGENES */
   getImagenes(): string[] {
-    if (!this.alojamiento || !this.alojamiento.imagenes) return [];
-    return this.alojamiento.imagenes;
+    if (!this.alojamiento) return [];
+    return this.alojamiento.imagenes || [];
   }
 
-  cambiarImagen(direccion: 'anterior' | 'siguiente'): void {
-    const imagenes = this.getImagenes();
-    if (imagenes.length <= 1) return;
+  getImagenActual(): string {
+    const imgs = this.getImagenes();
+    if (imgs.length === 0) return "";
+    return imgs[this.imagenActualIndex];
+  }
 
-    if (direccion === 'siguiente') {
-      this.imagenActualIndex = (this.imagenActualIndex + 1) % imagenes.length;
+  cambiarImagen(dir: 'anterior' | 'siguiente'): void {
+    const imgs = this.getImagenes();
+    if (imgs.length <= 1) return;
+
+    if (dir === 'siguiente') {
+      this.imagenActualIndex = (this.imagenActualIndex + 1) % imgs.length;
     } else {
-      this.imagenActualIndex = this.imagenActualIndex === 0 ?
-        imagenes.length - 1 : this.imagenActualIndex - 1;
+      this.imagenActualIndex = this.imagenActualIndex === 0
+        ? imgs.length - 1
+        : this.imagenActualIndex - 1;
     }
   }
 
@@ -107,6 +111,7 @@ export class DetalleAlojamientoComponent implements OnInit {
     this.imagenActualIndex = index;
   }
 
+  /** FORMATEO */
   formatearPrecio(precio: number): string {
     return new Intl.NumberFormat('es-CO', {
       style: 'currency',
@@ -131,9 +136,9 @@ export class DetalleAlojamientoComponent implements OnInit {
     return nombres[tipo] || tipo;
   }
 
-  reservarAlojamiento(): void {
+  /** Navegación */
+  reservarAlojamiento() {
     if (!this.alojamiento) return;
-
     this.router.navigate(['/crear-reserva', this.alojamiento.id]);
   }
 
