@@ -1,7 +1,7 @@
 // jwt.interceptor.ts
 import { Injectable } from '@angular/core';
 import {HttpInterceptorFn, HttpRequest, HttpHandler, HttpEvent} from '@angular/common/http';
-import { AuthService } from '../auth/auth.service';
+import { AuthService } from '../service/auth.service';
 import {Observable} from 'rxjs';
 
 export const jwtInterceptor: (req: HttpRequest<any>, next: HttpHandler) => (Observable<HttpEvent<any>>) = (req: HttpRequest<any>, next: HttpHandler) => {

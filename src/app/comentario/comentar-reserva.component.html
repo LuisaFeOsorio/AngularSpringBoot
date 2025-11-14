@@ -1,0 +1,31 @@
+<div class="container mt-4">
+  <h2>Dejar comentario</h2>
+
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+  <div class="mb-3">
+    <label class="form-label">Calificación</label>
+    <div class="d-flex">
+      <span *ngFor="let star of [1,2,3,4,5]"
+            (click)="calificacion = star"
+            class="me-2"
+            style="cursor:pointer; font-size: 28px"
+      >
+        ⭐
+      </span>
+    </div>
+    <p>Seleccionado: {{ calificacion }} estrellas</p>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Comentario</label>
+    <textarea [(ngModel)]="contenido"
+              class="form-control"
+              rows="4"
+              placeholder="Describe tu experiencia"></textarea>
+  </div>
+
+  <button class="btn btn-primary" (click)="enviarComentario()" [disabled]="cargando">
+    Enviar Comentario
+  </button>
+</div>

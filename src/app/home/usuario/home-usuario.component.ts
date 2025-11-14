@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { AuthService } from '../auth/auth.service'; // ✅ Asegúrate de tener este servicio
+import { AuthService } from '../../service/auth.service'; // ✅ Asegúrate de tener este servicio
 
 interface AlojamientoDTO {
   id: number;
@@ -71,7 +71,7 @@ export class DashboardUsuarioComponent implements OnInit {
     return (
       alojamiento.imagenPrincipal ||
       alojamiento.imagenes?.[0] ||
-      'assets/images/placeholder-alojamiento.jpg'
+      'src/assets/images/placeholder-alojamiento.jpg'
     );
   }
 

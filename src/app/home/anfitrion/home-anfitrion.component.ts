@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { AuthService } from '../auth/auth.service';
+import { AuthService } from '../../service/auth.service';
 import { FormsModule } from '@angular/forms';
 
 interface AlojamientoDTO {
@@ -52,6 +52,12 @@ export class DashboardAnfitrionComponent implements OnInit {
     const headersObj = this.auth.getAuthHeaders();
     return new HttpHeaders(headersObj);
   }
+  verReservasPendientes(): void {
+    const userId = this.auth.getCurrentUserId();
+    console.log("📬 Navegando a reservas pendientes del anfitrión ID:", userId);
+    this.router.navigate(['/reservas-pendientes', userId]);
+  }
+
 
   cargarMisAlojamientos(): void {
     this.cargando = true;

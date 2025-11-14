@@ -3,7 +3,7 @@ import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import Swal from 'sweetalert2';
-import { AuthService } from '../auth/auth.service';
+import { AuthService } from '../service/auth.service';
 
 interface LoginDTO {
   email: string;

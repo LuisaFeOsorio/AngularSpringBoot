@@ -1,0 +1,41 @@
+<div class="container py-4">
+
+  <h2 class="mb-4">Reservas Pendientes</h2>
+
+  <div *ngIf="cargando">Cargando...</div>
+
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+  <table *ngIf="reservas.length > 0" class="table table-bordered">
+    <thead class="table-light">
+    <tr>
+      <th>Usuario</th>
+      <th>Alojamiento</th>
+      <th>Check-in</th>
+      <th>Check-out</th>
+      <th>Acciones</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let r of reservas">
+      <td>{{ r.usuarioNombre }}</td>
+      <td>{{ r.alojamientoNombre }}</td>
+      <td>{{ r.checkIn }}</td>
+      <td>{{ r.checkOut }}</td>
+      <td>
+        <button class="btn btn-success btn-sm me-2" (click)="aceptar(r.id)">
+          Aceptar
+        </button>
+        <button class="btn btn-danger btn-sm" (click)="rechazar(r.id)">
+          Rechazar
+        </button>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="reservas.length === 0 && !cargando" class="alert alert-info">
+    No hay reservas pendientes.
+  </div>
+
+</div>

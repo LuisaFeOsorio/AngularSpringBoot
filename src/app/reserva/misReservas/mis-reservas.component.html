@@ -9,33 +9,40 @@
   </div>
 
   <div *ngIf="reservas.length > 0" class="grid gap-4 md:grid-cols-2">
+
     <div *ngFor="let reserva of reservas" class="p-4 bg-white rounded-2xl shadow">
+
       <h3 class="text-lg font-bold text-blue-600">{{ reserva.alojamientoNombre }}</h3>
       <p class="text-gray-600">{{ reserva.alojamientoCiudad }}</p>
+
       <p><strong>Check-in:</strong> {{ formatearFecha(reserva.checkIn) }}</p>
       <p><strong>Check-out:</strong> {{ formatearFecha(reserva.checkOut) }}</p>
       <p><strong>Huéspedes:</strong> {{ reserva.numeroHuespedes }}</p>
       <p><strong>Total:</strong> {{ reserva.precioTotal | currency:'COP':'symbol':'1.0-0' }}</p>
       <p><strong>Estado:</strong> <span class="font-semibold">{{ reserva.estado }}</span></p>
-      <tr *ngFor="let reserva of reservas">
-        <td>{{ reserva.alojamientoNombre }}</td>
-        <td>{{ reserva.checkIn | date }}</td>
-        <td>{{ reserva.checkOut | date }}</td>
-        <td>{{ reserva.estado }}</td>
-        <td>
-          <button
-            *ngIf="reserva.estado !== 'CANCELADA'"
-            class="btn btn-danger btn-sm"
-            (click)="cancelarReserva(reserva.id)">
-            Cancelar
-          </button>
 
-          <span *ngIf="reserva.estado === 'CANCELADA'" class="text-muted">
-      Cancelada
-    </span>
-        </td>
-      </tr>
+      <div class="mt-3 flex gap-2">
 
+        <!-- CANCELAR -->
+        <button
+          *ngIf="reserva.estado !== 'CANCELADA' && reserva.estado !== 'COMPLETADA'"
+          class="px-4 py-2 bg-red-500 text-white rounded-lg"
+          (click)="cancelarReserva(reserva.id)">
+          Cancelar
+        </button>
+
+        <!-- COMENTAR -->
+        <button
+          *ngIf="reserva.estado === 'COMPLETADA'"
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg"
+          (click)="comentario(reserva.id)">
+          Comentar
+        </button>
+
+        <span *ngIf="reserva.estado === 'CANCELADA'" class="text-gray-500 italic">
+          Reserva cancelada
+        </span>
+      </div>
     </div>
   </div>
 </div>

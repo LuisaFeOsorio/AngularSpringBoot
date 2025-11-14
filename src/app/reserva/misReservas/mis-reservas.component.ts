@@ -1,18 +1,20 @@
 // src/app/reservas/mis-reservas.component.ts
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
-import { ReservaService, ReservaDTO } from './reserva.service';
-import { AuthService } from '../auth/auth.service';
-import {HttpClient} from '@angular/common/http';
+import {CommonModule, CurrencyPipe} from '@angular/common';
+import { Router, RouterLink } from '@angular/router';
+import { ReservaService, ReservaDTO } from '../../service/reserva.service';
+import { AuthService } from '../../service/auth.service';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-mis-reservas',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ],
+
   templateUrl: 'mis-reservas.component.html'
 })
 export class MisReservasComponent implements OnInit {
+
   private reservaService = inject(ReservaService);
   private authService = inject(AuthService);
   private http = inject(HttpClient);
@@ -40,6 +42,7 @@ export class MisReservasComponent implements OnInit {
       },
       error: (err) => {
         this.cargando = false;
+
         if (err.status === 401) {
           this.error = 'Sesión expirada. Inicia sesión nuevamente.';
           this.authService.logout();
@@ -51,6 +54,7 @@ export class MisReservasComponent implements OnInit {
       }
     });
   }
+
   cancelarReserva(id: number) {
     if (!confirm('¿Estás segura de que deseas cancelar esta reserva?')) {
       return;
@@ -60,15 +64,20 @@ export class MisReservasComponent implements OnInit {
 
     this.http.put(`http://localhost:8080/api/reservas/${id}/cancelar`, {}, { headers })
       .subscribe({
-        next: (res: any) => {
+        next: () => {
           alert('Reserva cancelada con éxito.');
-          this.cargarReservas(); // 🔄 recarga la lista
+          this.cargarReservas();
         },
         error: (err) => {
-          console.error('❌ Error cancelando reserva:', err);
+          console.error('Error cancelando reserva:', err);
           alert('Error al cancelar la reserva.');
         }
       });
+  }
+
+  comentario(id: number) {
+
+    this.router.navigate(['/comentar-reserva', id]);
   }
 
   verDetalleAlojamiento(nombre: string) {
@@ -76,6 +85,10 @@ export class MisReservasComponent implements OnInit {
   }
 
   formatearFecha(fecha: string): string {
-    return new Date(fecha).toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
+    return new Date(fecha).toLocaleDateString('es-CO', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric'
+    });
   }
 }
