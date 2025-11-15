@@ -1,0 +1,26 @@
+<div class="container mt-4">
+  <h2>Responder Comentario</h2>
+
+  <div *ngIf="comentarioOriginal" class="mb-3 p-3 border rounded bg-light">
+    <h5>Comentario original:</h5>
+    <p><strong>{{ comentarioOriginal.usuarioNombre }}</strong></p>
+    <p>{{ comentarioOriginal.contenido }}</p>
+  </div>
+
+  <textarea
+    [(ngModel)]="respuesta"
+    rows="4"
+    class="form-control"
+    placeholder="Escribe tu respuesta..."
+  ></textarea>
+
+  <div class="text-danger mt-2">{{ error }}</div>
+
+  <button
+    class="btn btn-primary mt-3"
+    (click)="enviarRespuesta()"
+    [disabled]="cargando"
+  >
+    {{ cargando ? 'Enviando...' : 'Responder' }}
+  </button>
+</div>

@@ -34,7 +34,6 @@ export class EliminarAlojamientoComponent implements OnInit {
     }
   }
 
-  /** Cargar la información del alojamiento por ID */
   cargarAlojamiento(id: number): void {
     this.http.get<any>(`${this.apiUrl}/${id}`).subscribe({
       next: (response) => {
@@ -52,7 +51,6 @@ export class EliminarAlojamientoComponent implements OnInit {
     });
   }
 
-  /** Verifica si el alojamiento puede eliminarse (sin reservas futuras) */
   verificarPuedeEliminarse(id: string): void {
     this.http.get<any>(`${this.apiUrl}/${id}/puede-eliminarse`).subscribe({
       next: (response) => {
@@ -71,7 +69,6 @@ export class EliminarAlojamientoComponent implements OnInit {
     });
   }
 
-  /** Marcar alojamiento como inactivo */
   eliminarAlojamiento(): void {
     if (!this.alojamiento || !this.puedeEliminarse) return;
 

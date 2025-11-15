@@ -1,85 +1,113 @@
 <div class="container py-4">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="fw-bold text-primary mb-0">Alojamientos Disponibles</h1>
 
-    <!-- 🔵 Botones superiores -->
-    <div class="d-flex gap-2">
-      <button class="btn btn-outline-primary" (click)="actualizarUsuario()">
-        <i class="bi bi-person-lines-fill me-1"></i> Actualizar Usuario
-      </button>
+  <div class="container py-4">
 
-      <button class="btn btn-outline-success" (click)="verHistorialReservas()">
-        <i class="bi bi-journal-text me-1"></i> Ver Historial de Reservas
-      </button>
+    <h2 class="fw-bold text-primary">Buscar por Mapa</h2>
+
+    <!-- MAPBOX -->
+    <div
+      id="mapaBusqueda"
+      style="width: 100%; height: 350px; border-radius: 10px;"
+      class="mb-3 shadow-sm">
     </div>
-  </div>
 
-  <div class="mb-3">
-    <button class="btn btn-outline-secondary btn-sm" (click)="recargar()">
-      🔄 Recargar
+    <!-- Coordenadas seleccionadas -->
+    <div *ngIf="selectedLat && selectedLng" class="alert alert-info">
+      📍 <strong>Ubicación seleccionada:</strong><br>
+      Latitud: {{ selectedLat }} <br>
+      Longitud: {{ selectedLng }}
+    </div>
+
+    <button class="btn btn-primary mb-4" (click)="buscarPorMapa()">
+      Buscar alojamientos cerca de esta ubicación
     </button>
-    <small class="text-muted ms-2">Estado: {{ cargando ? 'Cargando...' : 'Listo' }}</small>
-  </div>
 
-  <!-- Spinner -->
-  <div *ngIf="cargando" class="text-center py-5">
-    <div class="spinner-border text-primary" role="status">
-      <span class="visually-hidden">Cargando...</span>
+    <hr>
+
+    <!-- 🔵 LO DEMÁS SIGUE IGUAL ABAJO -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1 class="fw-bold text-primary mb-0">Alojamientos Disponibles</h1>
+
+      <!-- 🔵 Botones superiores -->
+      <div class="d-flex gap-2">
+        <button class="btn btn-outline-primary" (click)="actualizarUsuario()">
+          <i class="bi bi-person-lines-fill me-1"></i> Actualizar Usuario
+        </button>
+
+        <button class="btn btn-outline-success" (click)="verHistorialReservas()">
+          <i class="bi bi-journal-text me-1"></i> Ver Historial de Reservas
+        </button>
+      </div>
     </div>
-    <p class="mt-2 text-muted">Cargando alojamientos...</p>
-  </div>
 
-  <!-- Error -->
-  <div *ngIf="error && !cargando" class="alert alert-danger alert-dismissible fade show">
-    <strong>Error:</strong> {{ error }}
-    <button type="button" class="btn-close" (click)="error = ''"></button>
-  </div>
+    <div class="mb-3">
+      <button class="btn btn-outline-secondary btn-sm" (click)="recargar()">
+        🔄 Recargar
+      </button>
+      <small class="text-muted ms-2">Estado: {{ cargando ? 'Cargando...' : 'Listo' }}</small>
+    </div>
 
-  <!-- Alojamientos -->
-  <div *ngIf="!cargando && !error" class="row g-4">
-    <div *ngFor="let alojamiento of alojamientos" class="col-lg-4 col-md-6">
-      <div class="card h-100 shadow-sm">
-        <img
-          [src]="getImagenPrincipal(alojamiento)"
-          class="card-img-top"
-          [alt]="alojamiento.nombre"
-          style="height: 200px; object-fit: cover;"
-        />
+    <!-- Spinner -->
+    <div *ngIf="cargando" class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+      <p class="mt-2 text-muted">Cargando alojamientos...</p>
+    </div>
 
-        <div class="card-body">
-          <h5 class="card-title">{{ alojamiento.nombre }}</h5>
-          <p class="text-muted">
-            <i class="bi bi-geo-alt"></i> {{ alojamiento.ciudad }}, {{ alojamiento.pais }}
-          </p>
-          <p class="card-text">
-            {{ (alojamiento.descripcion || '').slice(0, 100) }}...
-          </p>
+    <!-- Error -->
+    <div *ngIf="error && !cargando" class="alert alert-danger alert-dismissible fade show">
+      <strong>Error:</strong> {{ error }}
+      <button type="button" class="btn-close" (click)="error = ''"></button>
+    </div>
 
-          <div class="mb-3">
-            <small class="text-muted me-3">
-              <i class="bi bi-people"></i> {{ alojamiento.capacidadMaxima }} huésp.
-            </small>
-            <small class="text-muted me-3">
-              <i class="bi bi-door-closed"></i> {{ alojamiento.numeroHabitaciones }} hab.
-            </small>
-            <small class="text-muted">
-              <i class="bi bi-bath"></i> {{ alojamiento.numeroBanos }} baños
-            </small>
-          </div>
+    <!-- Alojamientos -->
+    <div *ngIf="!cargando && !error" class="row g-4">
+      <div *ngFor="let alojamiento of alojamientos" class="col-lg-4 col-md-6">
+        <div class="card h-100 shadow-sm">
+          <img
+            [src]="getImagenPrincipal(alojamiento)"
+            class="card-img-top"
+            [alt]="alojamiento.nombre"
+            style="height: 200px; object-fit: cover;"
+          />
 
-          <div class="d-flex justify-content-between align-items-center">
-            <span class="h5 text-primary mb-0">{{ formatearPrecio(alojamiento.precioPorNoche) }}</span>
-            <button class="btn btn-primary btn-sm" (click)="verDetalle(alojamiento.id)">
-              Ver Más
-            </button>
+          <div class="card-body">
+            <h5 class="card-title">{{ alojamiento.nombre }}</h5>
+            <p class="text-muted">
+              <i class="bi bi-geo-alt"></i> {{ alojamiento.ciudad }}, {{ alojamiento.pais }}
+            </p>
+            <p class="card-text">
+              {{ (alojamiento.descripcion || '').slice(0, 100) }}...
+            </p>
+
+            <div class="mb-3">
+              <small class="text-muted me-3">
+                <i class="bi bi-people"></i> {{ alojamiento.capacidadMaxima }} huésp.
+              </small>
+              <small class="text-muted me-3">
+                <i class="bi bi-door-closed"></i> {{ alojamiento.numeroHabitaciones }} hab.
+              </small>
+              <small class="text-muted">
+                <i class="bi bi-bath"></i> {{ alojamiento.numeroBanos }} baños
+              </small>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="h5 text-primary mb-0">{{ formatearPrecio(alojamiento.precioPorNoche) }}</span>
+              <button class="btn btn-primary btn-sm" (click)="verDetalle(alojamiento.id)">
+                Ver Más
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Sin resultados -->
-  <div *ngIf="!cargando && !error && alojamientos.length === 0" class="text-center py-5">
-    <h3 class="text-muted">No hay alojamientos disponibles</h3>
+    <!-- Sin resultados -->
+    <div *ngIf="!cargando && !error && alojamientos.length === 0" class="text-center py-5">
+      <h3 class="text-muted">No hay alojamientos disponibles</h3>
+    </div>
   </div>
 </div>

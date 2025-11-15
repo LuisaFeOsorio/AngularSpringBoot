@@ -81,8 +81,6 @@ export class DetalleAlojamientoComponent implements OnInit {
     });
   }
 
-
-  /** IMÁGENES */
   getImagenes(): string[] {
     if (!this.alojamiento) return [];
     return this.alojamiento.imagenes || [];
@@ -111,7 +109,6 @@ export class DetalleAlojamientoComponent implements OnInit {
     this.imagenActualIndex = index;
   }
 
-  /** FORMATEO */
   formatearPrecio(precio: number): string {
     return new Intl.NumberFormat('es-CO', {
       style: 'currency',

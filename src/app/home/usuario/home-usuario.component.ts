@@ -1,8 +1,10 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { AuthService } from '../../service/auth.service'; // ✅ Asegúrate de tener este servicio
+import { AuthService } from '../../service/auth.service';
+import { MapService } from '../../service/map.service';
 
 interface AlojamientoDTO {
   id: number;
@@ -24,21 +26,39 @@ interface AlojamientoDTO {
 @Component({
   selector: 'app-dashboard-usuario',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: 'home-usuario.component.html'
 })
 export class DashboardUsuarioComponent implements OnInit {
   private http = inject(HttpClient);
   private router = inject(Router);
-  private authService = inject(AuthService); // ✅ Inyectamos el AuthService
+  private authService = inject(AuthService);
+  private mapService = inject(MapService);
 
   alojamientos: AlojamientoDTO[] = [];
+  alojamientosOriginal: AlojamientoDTO[] = [];
+
+  busqueda: string = '';
+
   cargando = true;
   error = '';
+
+  selectedLat: number | null = null;
+  selectedLng: number | null = null;
 
   ngOnInit() {
     console.log('🔵 ngOnInit - Iniciando componente');
     this.cargarAlojamientos();
+
+    setTimeout(() => {
+      this.mapService.create("mapaBusqueda");
+
+      this.mapService.onMapClick().subscribe(coords => {
+        this.selectedLat = coords.lat;
+        this.selectedLng = coords.lng;
+        console.log("📍 Coordenadas seleccionadas:", coords);
+      });
+    }, 300);
   }
 
   cargarAlojamientos(): void {
@@ -52,6 +72,7 @@ export class DashboardUsuarioComponent implements OnInit {
       next: (alojamientos) => {
         console.log('✅ Alojamientos cargados', alojamientos);
         this.alojamientos = alojamientos;
+        this.alojamientosOriginal = [...alojamientos];
         this.cargando = false;
       },
       error: (err: HttpErrorResponse) => {
@@ -61,6 +82,46 @@ export class DashboardUsuarioComponent implements OnInit {
         this.error = `Error ${err.status}: ${err.statusText}`;
       }
     });
+  }
+
+  filtrarAlojamientos() {
+    const texto = this.busqueda.trim().toLowerCase();
+
+    if (texto === '') {
+      this.alojamientos = [...this.alojamientosOriginal];
+      return;
+    }
+
+    this.alojamientos = this.alojamientosOriginal.filter(a =>
+      a.nombre.toLowerCase().includes(texto)
+    );
+  }
+
+  // ⭐ Enviar coordenadas al backend
+  buscarPorMapa() {
+    if (!this.selectedLat || !this.selectedLng) {
+      alert("Selecciona una ubicación en el mapa primero");
+      return;
+    }
+
+    const body = {
+      latitud: this.selectedLat,
+      longitud: this.selectedLng
+    };
+
+    console.log("📡 Enviando búsqueda por mapa:", body);
+
+    this.http.post<AlojamientoDTO[]>('http://localhost:8080/api/alojamientos/buscar-por-ubicacion', body)
+      .subscribe({
+        next: (response) => {
+          this.alojamientos = response;
+          this.alojamientosOriginal = response;
+        },
+        error: err => {
+          console.error("❌ Error en búsqueda por ubicación:", err);
+          alert("Error buscando por ubicación");
+        }
+      });
   }
 
   verDetalle(alojamientoId: number): void {
@@ -76,29 +137,19 @@ export class DashboardUsuarioComponent implements OnInit {
   }
 
   formatearPrecio(precio: number): string {
-    return new Intl.NumberFormat('es-CO', {
-      style: 'currency',
-      currency: 'COP'
-    }).format(precio);
+    return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(precio);
   }
 
   recargar(): void {
     this.cargarAlojamientos();
   }
 
-  // 🔵 Botón para editar usuario
   actualizarUsuario() {
-    const userId = this.authService.getCurrentUserId(); // ✅ obtenemos el ID del usuario autenticado
-    if (userId) {
-      console.log('🧑‍💼 Redirigiendo a actualizar usuario con ID:', userId);
-      this.router.navigate(['/editar-usuario', userId]); // ✅ enviamos el ID como parámetro en la ruta
-    } else {
-      console.error('❌ No se encontró el ID del usuario autenticado.');
-    }
+    const userId = this.authService.getCurrentUserId();
+    if (userId) this.router.navigate(['/editar-usuario', userId]);
   }
 
   verHistorialReservas() {
-    console.log('📜 Redirigiendo al historial de reservas');
     this.router.navigate(['/mis-reservas']);
   }
 }
